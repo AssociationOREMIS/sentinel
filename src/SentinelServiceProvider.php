@@ -32,6 +32,6 @@ class SentinelServiceProvider extends ServiceProvider
         $router = $this->app['router'];
 
         $router->aliasMiddleware('remote.token', CheckRemoteToken::class);
-        $router->aliasMiddleware('ability', CheckAbility::class);
+        $router->aliasMiddleware('sentinel.ability', CheckAbility::class);
     }
 }

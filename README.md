@@ -43,6 +43,35 @@ SENTINEL_VALIDATE_ENDPOINT=/api/validate-token
 SENTINEL_CACHE_TTL=15
 ```
 
+## Middleware Registration (Laravel 11+)
+
+In Laravel 11, you may need to manually register the middleware aliases in your `bootstrap/app.php` file to use them as string aliases in your routes.
+
+```php
+// bootstrap/app.php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Middleware;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'remote.token'     => \Oremis\Sentinel\Middleware\CheckRemoteToken::class,
+            'sentinel.ability' => \Oremis\Sentinel\Middleware\CheckAbility::class,
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })
+    ->create();
+```
+
 ## How It Works
 
 1.  **Incoming Request**: An API request arrives at your application with a `Authorization: Bearer <token>` header.
@@ -51,13 +80,13 @@ SENTINEL_CACHE_TTL=15
 4.  **Remote Validation**: If not cached, it sends a request to the configured Identity Provider (`SENTINEL_BASE_URL`).
     - The IDP returns the token's validity, associated abilities, and the owner (User or Service).
 5.  **Context Injection**: The middleware injects the `abilities`, `token_user_id`, and `token_service_id` into the request attributes.
-6.  **Authorization**: The `ability` middleware (if used) checks if the injected abilities match the route requirements.
+6.  **Authorization**: The `sentinel.ability` middleware (if used) checks if the injected abilities match the route requirements.
 
 ## Usage
 
 ### 1. Protecting Routes
 
-Apply the middleware to your API routes. You typically need `remote.token` to validate the user, and optionally `ability` to enforce permissions.
+Apply the middleware to your API routes. You typically need `remote.token` to validate the user, and optionally `sentinel.ability` to enforce permissions.
 
 ```php
 use Illuminate\Support\Facades\Route;
@@ -70,12 +99,12 @@ Route::middleware(['remote.token'])->group(function () {
     });
 
     // Route requiring specific abilities
-    Route::middleware('ability:ca.gdpr:create')->post('/gdpr-records', function () {
+    Route::middleware('sentinel.ability:ca.gdpr:create')->post('/gdpr-records', function () {
         // ...
     });
 
     // Route requiring ANY of the listed abilities
-    Route::middleware('ability:admin,editor')->group(function () {
+    Route::middleware('sentinel.ability:admin,editor')->group(function () {
         // ...
     });
 });
