@@ -4,6 +4,7 @@ namespace Oremis\Sentinel\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CheckAbility
 {
@@ -24,6 +25,6 @@ class CheckAbility
             }
         }
 
-        abort(403, 'Forbidden: missing required ability');
+        throw new HttpException(403, 'Forbidden: missing required ability');
     }
 }

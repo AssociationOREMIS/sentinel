@@ -2,6 +2,9 @@
 
 namespace Oremis\Sentinel\Services;
 
+use Illuminate\Support\Facades\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 class TokenAbilityService
 {
     /**
@@ -9,7 +12,7 @@ class TokenAbilityService
      */
     public function abilities(): array
     {
-        return request()->attributes->get('abilities', []);
+        return Request::instance()->attributes->get('abilities', []);
     }
 
     /**
@@ -45,7 +48,7 @@ class TokenAbilityService
     public function require(string|array $abilities): void
     {
         if (! $this->can($abilities)) {
-            abort(403, 'Forbidden: insufficient ability');
+            throw new HttpException(403, 'Forbidden: insufficient ability');
         }
     }
 
@@ -54,6 +57,6 @@ class TokenAbilityService
      */
     public function userId(): ?int
     {
-        return request()->attributes->get('token_user_id');
+        return Request::instance()->attributes->get('token_user_id');
     }
 }
