@@ -27,8 +27,10 @@ class TokenAbilityService
         }
 
         foreach ((array) $abilities as $ability) {
-            if (in_array($ability, $tokenAbilities, true)) {
-                return true;
+            foreach ($tokenAbilities as $tokenAbility) {
+                if (\Illuminate\Support\Str::is($tokenAbility, $ability)) {
+                    return true;
+                }
             }
         }
 

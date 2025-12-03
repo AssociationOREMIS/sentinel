@@ -17,8 +17,10 @@ class CheckAbility
         }
 
         foreach ($requiredAbilities as $ability) {
-            if (in_array($ability, $tokenAbilities, true)) {
-                return $next($request);
+            foreach ($tokenAbilities as $tokenAbility) {
+                if (\Illuminate\Support\Str::is($tokenAbility, $ability)) {
+                    return $next($request);
+                }
             }
         }
 
