@@ -2,7 +2,7 @@
     "name": "oremis/sentinel",
     "description": "OREMIS centralized token validation and ability system (Sentinel)",
     "type": "library",
-    "license": "proprietary",
+    "license": "AGPL-3.0-or-later",
     "autoload": {
         "psr-4": {
             "Oremis\\Sentinel\\": "src/"
