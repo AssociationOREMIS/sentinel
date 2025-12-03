@@ -59,4 +59,12 @@ class TokenAbilityService
     {
         return Request::instance()->attributes->get('token_user_id');
     }
+
+    /**
+     * Get the service_id linked to the token (for audit).
+     */
+    public function serviceId(): ?int
+    {
+        return Request::instance()->attributes->get('token_service_id');
+    }
 }

@@ -26,6 +26,7 @@ class CheckRemoteToken
         if ($cached = cache()->get($cacheKey)) {
             $request->attributes->set('abilities', $cached['abilities']);
             $request->attributes->set('token_user_id', $cached['user_id'] ?? null);
+            $request->attributes->set('token_service_id', $cached['service_id'] ?? null);
 
             return $next($request);
         }
@@ -35,13 +36,16 @@ class CheckRemoteToken
             'token' => $token,
         ]);
 
-        if ($response->failed() || $response->json('valid') !== true) {
+        $payload = $response->json('data', []);
+
+        if ($response->failed() || ($payload['valid'] ?? false) !== true) {
             abort(401, 'Invalid or expired token');
         }
 
         $data = [
-            'abilities' => $response->json('abilities', []),
-            'user_id'   => $response->json('user_id'),
+            'abilities'  => $payload['abilities'] ?? [],
+            'user_id'    => $payload['user_id'] ?? null,
+            'service_id' => $payload['service_id'] ?? null,
         ];
 
         // Cache validation result
@@ -50,6 +54,7 @@ class CheckRemoteToken
         // Inject into the request
         $request->attributes->set('abilities', $data['abilities']);
         $request->attributes->set('token_user_id', $data['user_id']);
+        $request->attributes->set('token_service_id', $data['service_id']);
 
         return $next($request);
     }
