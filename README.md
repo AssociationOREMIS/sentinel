@@ -12,6 +12,11 @@ This package allows client applications (like **App**, **Pio**, etc.) to offload
 - **Performance**: Caches validation results locally to minimize network requests.
 - **Laravel Integration**: Provides Middleware, Facades, and a Service Provider for seamless integration.
 
+## Compatibility
+
+- **Laravel**: 10.x, 11.x, 12.x, 13.x
+- **PHP**: 8.3, 8.4, 8.5
+
 ## Installation
 
 Install the package via Composer:
