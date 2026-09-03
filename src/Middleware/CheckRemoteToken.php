@@ -3,6 +3,7 @@
 namespace Oremis\Sentinel\Middleware;
 
 use Closure;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -31,10 +32,19 @@ class CheckRemoteToken
             return $next($request);
         }
 
-        // Remote validation via Identity Provider
-        $response = Http::get($baseUrl . $endpoint, [
-            'token' => $token,
-        ]);
+        // Remote validation via Identity Provider.
+        // The token travels in the Authorization header, never in the URL,
+        // so it can't leak into access/proxy logs or intermediary caches.
+        try {
+            $response = Http::withToken($token)
+                ->timeout(5)
+                ->connectTimeout(3)
+                ->get($baseUrl . $endpoint);
+        } catch (ConnectionException) {
+            // Fail closed (401) rather than surfacing a 500 if the IdP is
+            // unreachable or too slow to answer within the timeout.
+            abort(401, 'Identity Provider unavailable');
+        }
 
         $payload = $response->json('data', []);
 

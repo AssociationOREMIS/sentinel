@@ -82,8 +82,9 @@ return Application::configure(basePath: dirname(__DIR__))
 1.  **Incoming Request**: An API request arrives at your application with a `Authorization: Bearer <token>` header.
 2.  **Middleware Interception**: The `remote.token` middleware intercepts the request.
 3.  **Cache Check**: It checks if the token's validity is already cached locally.
-4.  **Remote Validation**: If not cached, it sends a request to the configured Identity Provider (`SENTINEL_BASE_URL`).
+4.  **Remote Validation**: If not cached, it sends a request to the configured Identity Provider (`SENTINEL_BASE_URL`), passing the token via the `Authorization: Bearer <token>` header (never as a query parameter, to keep it out of access/proxy logs).
     - The IDP returns the token's validity, associated abilities, and the owner (User or Service).
+    - The request has a 5s timeout (3s to connect); if the IdP is unreachable or too slow, the middleware fails closed with a 401 instead of hanging or surfacing a 500.
 5.  **Context Injection**: The middleware injects the `abilities`, `token_user_id`, and `token_service_id` into the request attributes.
 6.  **Authorization**: The `sentinel.ability` middleware (if used) checks if the injected abilities match the route requirements.
 
@@ -162,6 +163,10 @@ The package expects the Identity Provider to return data in the following format
 - **abilities**: Array of permission strings.
 - **service_id**: Integer ID if the token belongs to a service account (otherwise null).
 - **user_id**: Integer ID if the token belongs to a user (otherwise null).
+
+## Upgrading to 1.1.0
+
+`CheckRemoteToken` now sends the token to the Identity Provider via the `Authorization: Bearer <token>` header instead of a `token` query parameter. **The IdP's validation endpoint must read the token from that header** (in addition to, or instead of, the query string) before upgrading, or validation will start failing with 401s.
 
 ## License
 
