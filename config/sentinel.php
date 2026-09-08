@@ -37,4 +37,20 @@ return [
     */
 
     'cache_ttl' => env('SENTINEL_CACHE_TTL', 15),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cloudflare Access Service Token
+    |--------------------------------------------------------------------------
+    |
+    | Only needed when `base_url` points at an Identity Provider sitting
+    | behind a Cloudflare Access policy (e.g. a dev.*.oremis.fr staging
+    | instance) — lets the outgoing token-validation call through without
+    | hitting the Access login page. Leave both blank in prod, where the
+    | production IdP isn't behind Access.
+    |
+    */
+
+    'cf_access_client_id' => env('SENTINEL_CF_ACCESS_CLIENT_ID'),
+    'cf_access_client_secret' => env('SENTINEL_CF_ACCESS_CLIENT_SECRET'),
 ];

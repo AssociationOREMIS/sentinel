@@ -2,6 +2,12 @@
 
 All notable changes to this package are documented here.
 
+## [1.2.0] - 2026-09-08
+
+### Added
+
+- `CheckRemoteToken` now sends `CF-Access-Client-Id`/`CF-Access-Client-Secret` headers on the outgoing IdP validation call, configurable via `SENTINEL_CF_ACCESS_CLIENT_ID`/`SENTINEL_CF_ACCESS_CLIENT_SECRET`. Only needed when `base_url` points at an Identity Provider sitting behind a Cloudflare Access policy (e.g. a `dev.*.oremis.fr` staging instance) — without this, Access silently redirects the validation call to its login page instead of the real endpoint, making every token look invalid. Left blank, behavior is unchanged.
+
 ## [1.1.0] - Unreleased
 
 ### Security

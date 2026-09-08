@@ -35,11 +35,22 @@ class CheckRemoteToken
         // Remote validation via Identity Provider.
         // The token travels in the Authorization header, never in the URL,
         // so it can't leak into access/proxy logs or intermediary caches.
+        $httpRequest = Http::withToken($token)
+            ->timeout(5)
+            ->connectTimeout(3);
+
+        $cfAccessClientId = config('sentinel.cf_access_client_id');
+        $cfAccessClientSecret = config('sentinel.cf_access_client_secret');
+
+        if ($cfAccessClientId && $cfAccessClientSecret) {
+            $httpRequest = $httpRequest->withHeaders([
+                'CF-Access-Client-Id' => $cfAccessClientId,
+                'CF-Access-Client-Secret' => $cfAccessClientSecret,
+            ]);
+        }
+
         try {
-            $response = Http::withToken($token)
-                ->timeout(5)
-                ->connectTimeout(3)
-                ->get($baseUrl . $endpoint);
+            $response = $httpRequest->get($baseUrl . $endpoint);
         } catch (ConnectionException) {
             // Fail closed (401) rather than surfacing a 500 if the IdP is
             // unreachable or too slow to answer within the timeout.
